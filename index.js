@@ -97,8 +97,9 @@ bot.launch()
 process.once('SIGINT', () => {bot.stop('SIGINT')
 mongoose.connection.close()
 })
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
-
+process.once('SIGTERM', () => {bot.stop('SIGTERM')
+mongoose.connection.close()
+})
 
  cron.schedule('*/1 * * * *',async ()=>{
      let date=new Date(Date.now())
