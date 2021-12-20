@@ -25,19 +25,19 @@ const startBot= async () => {
         case "/addreminder":{
         const regexp = /\/addreminder [0-9][0-9][0-9][0-9]:[0-1][0-9]:[0-3][0-9]:[0-2][0-9]:[0-5][0-9] \| .*$/
             if (msg.message.text.match(regexp)){
-                let rem={
+                const obj={
                     chatId
                 }
-                rem.date=msg.message.text.match(/[0-9][0-9][0-9][0-9]:[0-1][0-9]:[0-3][0-9]:[0-2][0-9]:[0-5][0-9]/)
-                rem.date=rem.date[0].split(':')
-                rem.date[1]-=1
-                rem.date=new Date(Date.UTC(...rem.date))
-                if(rem.date<=new Date(Date.now()+offset)) {await msg.reply("Дата меньше текущей");
+                obj.date=msg.message.text.match(/[0-9][0-9][0-9][0-9]:[0-1][0-9]:[0-3][0-9]:[0-2][0-9]:[0-5][0-9]/)
+                obj.date=obj.date[0].split(':')
+                obj.date[1]-=1
+                obj.date=new Date(Date.UTC(...obj.date))
+                if(obj.date<=new Date(Date.now()+offset)) {await msg.reply("Дата меньше текущей");
                 break;
             } 
-                rem.text=msg.message.text.match(/\| .*$/g)[0].substring(2)
+                obj.text=msg.message.text.match(/\| .*$/g)[0].substring(2)
 
-                const model = new Remind({...rem})
+                const model = new Remind({...obj})
                 await model.save()
                 await bot.telegram.sendMessage(chatId,"Напоминание сохранено, я напомню как придёт время.")
              }
@@ -81,7 +81,7 @@ const startBot= async () => {
         }
         }
         else {
-           await bot.telegram.sendMessage(chatId,"Добавьте пожалуйста параметры корректно")
+           await bot.telegram.sendMessage(chatId,"Добавьте пожалуйста параметры в соответствии с шаблоном")
         }
             break
         }
