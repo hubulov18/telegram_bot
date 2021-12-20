@@ -5,7 +5,7 @@ const cron = require('node-cron');
 const { Telegraf } = require('telegraf')
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING,{useUnifiedTopology:true, useNewUrlParser:true})
-
+const offset=3*60*60*1000
 const bot=new Telegraf(process.env.BOT_TOKEN)
 const startBot= async () => {
     
@@ -18,7 +18,6 @@ const startBot= async () => {
     })
 
     bot.on('message',async msg=>{
-        const offset=3*60*60*1000
         const message=msg.message.text.split(' ',1)
         const chatId=msg.chat.id
         switch (message[0]){
@@ -93,23 +92,25 @@ const startBot= async () => {
 })
     
 bot.launch()
-
-process.once('SIGINT', () => {bot.stop('SIGINT')
-mongoose.connection.close()
-})
-process.once('SIGTERM', () => {bot.stop('SIGTERM')
-mongoose.connection.close()
-})
-
- cron.schedule('*/1 * * * *',async ()=>{
-     let date=new Date(Date.now())
-     date.setMilliseconds(offset)
-     Remind.find({date},{chatId:1,text:1},null, async (err,obj)=>{
-        for (let i=0; i<obj.length; i++)
-           await bot.telegram.sendMessage(obj[i].chatId,obj[i].text)
-            
-    })
-    await Remind.deleteMany({date})
- }) 
 }
 startBot()
+
+cron.schedule('*/1 * * * *',async ()=>{
+     let date=new Date(Date.now()+offset)
+     date.setMilliseconds(0)
+      console.log(date)
+      Remind.find({date},{chatId:1,text:1},null, async (err,obj)=>{
+          console.log(err, obj)
+         for (let i=0; i<obj.length; i++)
+            await bot.telegram.sendMessage(obj[i].chatId,obj[i].text,nux)
+             
+     })
+     await Remind.deleteMany({date})
+     await Remind.deleteMany({date:{$lt: date}})
+  })
+  process.once('SIGINT', () => {bot.stop('SIGINT')
+ mongoose.connection.close()
+ })
+ process.once('SIGTERM', () => {bot.stop('SIGTERM')
+ mongoose.connection.close()
+ })
